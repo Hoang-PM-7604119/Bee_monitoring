@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select a Hive</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Youtube Sans', 'Roboto', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="font-size: 40px; font-weight: bold;">Select a Hive</h1>
+    <select style="font-size: 30px;" onchange="location = this.value;">
+        <option value="">Choose a hive...</option>
+        {% for hive in data %}
+            <!-- Assuming hive is a tuple and the first element is the hive's name -->
+            <option value="/table/{{ hive[0] }}">{{ hive[0] }}</option>
+        {% endfor %}
+    </select>
+    <script>
+        document.querySelector('select').addEventListener('change', function() {
+            window.location.href = this.value;
+        });
+    </script>
+</body>
+</html>

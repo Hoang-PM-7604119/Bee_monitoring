@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+  <meta charset="utf-8">
+  <title>Device Status</title>
+  <style>
+    .container {
+      padding: 20px;
+    }
+    .chart-container {
+      height: 400px;
+      margin-top: 20px;
+    }
+    .button-container {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body style="height: 100%; margin: 0">
+  <div class="container">
+    <form method="POST">
+      <label for="selected-date">Select Date:</label>
+      <input type="date" id="selected-date" name="selected-date" value="{{ selected_date }}">
+      <button type="submit">Submit</button>
+    </form>
+
+    <div id="cpu_temp_chart" class="chart-container"></div>
+    <div id="disk_space_chart" class="chart-container"></div>
+
+    <div class="button-container">
+      <button onclick="window.location.href='/'"" style="font-size: 15px; padding: 10px 20px; border-radius: 5px; border: none; color: white; background-color: #007bff; cursor: pointer;">Back</button>
+    </div>
+  </div>
+
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script type="text/javascript">
+    var th_times = {{ th_times | safe }};
+    var cpu_temp = {{ cpu_temp | safe }};
+    var disk_space = {{ disk_space | safe }};
+
+    // CPU Temperature Chart
+    var cpuTempChart = echarts.init(document.getElementById('cpu_temp_chart'));
+    var cpuTempOption = {
+      title: {
+        text: 'CPU Temperature (do C)'
+      },
+      tooltip: {
+        trigger: 'axis'
+      },
+      xAxis: {
+        type: 'category',
+        data: th_times
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [{
+        data: cpu_temp,
+        type: 'line',
+        smooth: true
+      }]
+    };
+
+
+    
+    cpuTempChart.setOption(cpuTempOption);
+
+    // Disk Space Chart
+    var diskSpaceChart = echarts.init(document.getElementById('disk_space_chart'));
+    var diskSpaceOption = {
+      title: {
+        text: 'Disk Space (GB)'
+      },
+      tooltip: {
+        trigger: 'axis'
+      },
+      xAxis: {
+        type: 'category',
+        data: th_times
+      },
+      yAxis: {
+        type: 'value',
+        data: disk_space
+      },
+      series: [{
+        data: disk_space,
+        type: 'line',
+        smooth: true
+      }]
+    };
+    diskSpaceChart.setOption(diskSpaceOption);
+
+    window.addEventListener('resize', function() {
+      cpuTempChart.resize();
+      diskSpaceChart.resize();
+    });
+  </script>
+</body>
+</html>

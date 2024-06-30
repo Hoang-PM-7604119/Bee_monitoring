@@ -1,0 +1,4 @@
+Find the process ID (PID) using ps:
+ps ax | grep main.py
+
+kill [PID]

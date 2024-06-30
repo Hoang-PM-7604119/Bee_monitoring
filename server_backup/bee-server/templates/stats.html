@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="//code.jquery.com/jquery-1.9.1.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.js" integrity="sha512-d6nObkPJgV791iTGuBoVC9Aa2iecqzJRE0Jiqvk85BhLHAPhWqkuBiQb1xz2jvuHNqHLYoN3ymPfpiB1o+Zgpw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <title>Bee Charts</title>
+</head>
+<style>
+  a:hover {
+  background-color: gray;
+  }
+</style>
+<body style="background-color: lightgray; font-family: 'Youtube Sans', 'Roboto', sans-serif;">
+  <h1 id="demo" style="text-align: center; margin-bottom: -0.5%; font-weight: bold">Quantitative result on {{ selected_date }} - Bee Hive {{ hive }}</h1>
+  <div class="pie" style="background-color: white; margin-left: 1%; width: 10%; border-radius: 2%; border: 1px solid white; margin-top: 1%;">
+    <canvas id="piechart" style="width: 100%; max-width: 800px; margin: 0 auto;"></canvas>
+  </div>
+  <div class="pie1" style="background-color: white; margin-left: 1%; width: 10%; border-radius: 2%; border: 1px solid white; margin-top: 1%;">
+    <canvas id="piechart1" style="width: 100%; max-width: 800px; margin: 0 auto;"></canvas>
+  </div>
+  <div class="line" style="background-color: white; margin-right: 23%; width: 65%; float: right; margin-top: -21%; border-radius: 1%;">
+    <canvas id="linechart" style="width: 100%; height: 400px; margin: 0 auto;"></canvas>
+  </div>
+  <div class="lich" style="float: right; margin-top: -13%; margin-right: 1%;">
+    <form method="post" style="display: flex; align-items: center; gap: 15px; margin-bottom: 0px; margin-top: -39%;">
+      <input required type="date" id="date-picker" class="form-control" name="selected-date" value="{{ selected_date }}" style="font-size: 15px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 120px;"> <!-- Adjust width as needed -->
+      <select required id="hive-picker" class="form-control" name="selected-hive" style="font-size: 15px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 80px;">
+        <option value="">Hive</option>
+        {% for hive1 in hive_data %}
+            {% if hive == hive1[0] %}
+                <option value="{{ hive1[0] }}" selected>{{ hive1[0] }}</option>
+            {% else %}
+                <option value="{{ hive1[0] }}">{{ hive1[0] }}</option>
+            {% endif %}
+        {% endfor %}
+      </select>
+      <button type="submit" style="font-size: 15px; padding: 10px 10px; border-radius: 5px; border: none; color: white; background-color: #007bff; cursor: pointer;">Search</button>
+      <button onclick="window.location.href='/';" type="button" style="font-size: 15px; padding: 10px 10px; border-radius: 5px; border: none; color: white; background-color: #007bff; cursor: pointer;">Home</button>
+    </form>
+  <video width="400" height="225" controls autoplay style="margin-right: 1%; margin-top: 2%; border-radius: 2%">
+  <source src= '/videos/{{ video }}' type="video/mp4">
+  </video>
+  </div>
+  <div class="bar1" style="background-color: white; width: 30%; float: left; margin-top: 1%; border-radius: 1%; margin-left: 1%;">
+    <canvas id="barchart1" style="width: 100%; height: 400px; margin: 0 auto;"></canvas>
+  </div>
+  <div class="bar" style="background-color: white; margin-right: 23%; width: 45%; float: right; margin-top: 1%; border-radius: 1%;">
+    <canvas id="barchart" style="width: 100%; height: 400px; margin: 0 auto;"></canvas>
+  </div>
+  <div class="line1" style="background-color: white; margin-right: 1%; width: 20.7%; float: right; margin-top: -28.5%; border-radius: 2%;">
+    <canvas id="linechart1" style="width: 100%; height: 265px; margin: 0 auto;"></canvas>
+  </div>
+  <div class="line2" style="background-color: white; margin-right: 1%; width: 20.7%; float: right; margin-top: -13.8%; border-radius: 2%;">
+    <canvas id="linechart2" style="width: 100%; height: 265px; margin: 0 auto;"></canvas>
+  </div>
+  <script>
+  const pie = document.getElementById('piechart');
+  const piechart = new Chart(pie, {
+      type: 'doughnut',
+      data: {
+          labels: ['Max', 'Min'],
+          datasets: [{
+              label: '# of Votes',
+              data: [{{ total_max }}, {{ total_min }}],
+              backgroundColor: [
+                'rgb(255, 99, 132)',
+                'rgb(54, 162, 235)',
+              ],
+              hoverOffset: 4
+          }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Number of max/min',
+        }
+      }
+    }
+  });
+
+
+  const pie1 = document.getElementById('piechart1');
+  const piechart1 = new Chart(pie1, {
+      type: 'doughnut',
+      data: {
+          labels: ['Max', 'Min'],
+          datasets: [{
+              label: '# of Votes',
+              data: [{{ total_max }}, {{ total_min }}],
+              backgroundColor: [
+                'rgb(255, 99, 132)',
+                'rgb(54, 162, 235)',
+              ],
+              hoverOffset: 4
+          }]
+      },
+      options: {
+        plugins: {
+          title: {
+            display: true,
+            text: 'Number of max/min',
+        }
+      }
+    }
+  });
+
+
+
+  const line = document.getElementById('linechart');
+  const time = JSON.parse('{{ times|safe }}');
+  const max = JSON.parse('{{ maxs|safe }}');
+  const min = JSON.parse('{{ mins|safe }}');
+  const linechart = new Chart(line, {
+      type: 'line',
+      data: {
+          labels: time,
+          datasets: [{
+              label: 'Max Bees',
+              data: max,
+              fill: false,
+              borderColor: 'rgb(255, 0, 0)',
+              backgroundColor: 'white',
+              tension: 0.1,
+              yAxisID: 'y1',
+          },
+          {
+            label: 'Min Bees',
+              data: min,
+              fill: true,
+              borderColor: 'rgb(255, 223, 128)',
+              tension: 0.1,
+              yAxisID: 'y',
+          }]
+      },
+      options: {
+        interaction: {
+          mode: 'index',
+        },
+        plugins: {
+          zoom: {
+            zoom: {
+              wheel: {
+                enabled: true,
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'xy',
+            }
+          },
+          title: {
+            display: true,
+            text: 'Number of bees max and min',
+            font: {
+              size: 20
+            }
+        }
+      },
+        scales: {
+          y: {
+            //max: 300,
+            min: 0,
+            type: 'linear',
+            position: 'left',
+            title: {
+              display: true,
+              text: 'Bees max',
+              font: {
+                size: 16,
+              }
+            },
+          },
+          y1: {
+            //max: 300,
+            min: 0,
+            type: 'linear',
+            position: 'right',
+            title: {
+              display: true,
+              text: 'Bees min',
+              font: {
+                size: 16,
+              }
+            },
+            grid: {
+              drawOnChartArea: false,
+            }
+          },
+        }
+    }
+  });
+
+
+  const bar = document.getElementById('barchart');
+  const time1 = JSON.parse('{{ times|safe }}');
+  const avg1 = JSON.parse('{{ avgs|safe }}');
+  const median1 = JSON.parse('{{ medians|safe }}');
+  const barchart = new Chart(bar, {
+      type: 'bar',
+      data: {
+          labels: time1,
+          datasets: [{
+              label: 'Bees avg',
+              data: avg1,
+              backgroundColor: 'rgb(255, 166, 77)',
+              type: 'bar'
+          },
+          {
+            label: 'Bees median',
+              data: median1,
+              backgroundColor: 'rgb(71, 71, 209)',
+              type: 'bar'
+          },]
+      },
+        options: {
+          responsive: true,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          scales: {
+            y: {
+              stacked: false
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Number of bees in/out',
+              font: {
+                size: 20
+              }
+            }
+          }
+        }
+  });
+
+
+  const line1 = document.getElementById('linechart1');
+  const time2 = JSON.parse('{{ th_times|safe }}');
+  const avg2 = JSON.parse('{{ temp|safe }}');
+  const linechart1 = new Chart(line1, {
+      type: 'line',
+      data: {
+          labels: time2,
+          datasets: [{
+              label: 'Average',
+              data: avg2,
+              fill: true,
+              borderColor: 'rgb(255, 0, 0)',
+              backgroundColor: 'rgb(255, 102, 102)',
+              tension: 0.1
+          }]
+      },
+      options: {
+        scales: {
+          y: {
+            max: 40,
+            min: 20
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Temparature (°C)',
+            font: {
+              size: 18
+            }
+        }
+      }
+    }
+  });
+
+
+  const line2 = document.getElementById('linechart2');
+  const time3 = JSON.parse('{{ th_times|safe }}');
+  const median3 = JSON.parse('{{ hum|safe }}');
+  const linechart2 = new Chart(line2, {
+      type: 'line',
+      data: {
+          labels: time3,
+          datasets: [{
+              label: 'Humidity',
+              data: median3,
+              fill: true,
+              borderColor: 'rgb(75, 192, 192)',
+              backgroundColor: 'rgb(0, 153, 255)',
+              tension: 0.1
+          }]
+      },
+      options: {
+        scales: {
+          y: {
+            max: 100,
+            min: 50
+          }
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Humidity (%)',
+            font: {
+              size: 18
+            }
+        }
+      }
+    }
+  });
+
+
+  const bar1 = document.getElementById('barchart1');
+  const time4 = JSON.parse('{{ times|safe }}');
+  const median4 = JSON.parse('{{ medians|safe }}');
+  const barchart1 = new Chart(bar1, {
+      type: 'bar',
+      data: {
+          labels: time4,
+          datasets: [{
+              label: 'Number of bees',
+              data: median4,
+              backgroundColor: 'rgb(117, 163, 163)',
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          elements: {
+            bar: {
+              borderWidth: 2,
+            }
+          },
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+            },
+            title: {
+              display: true,
+              text: 'Number of bees',
+              font: {
+                size: 20
+              }
+            }
+          }
+        },
+  });
+
+</script>
+</body>
+</html>

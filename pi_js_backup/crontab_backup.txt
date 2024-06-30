@@ -1,0 +1,10 @@
+
+#khoi dong vpn
+@reboot cd /home/ad01/bee/opvn_profile && sudo openvpn --config bee01.ovpn
+#quay + xu ly+ gui video
+*/30 5-17 * * * /home/ad01/bee/record_proc_send.sh
+# gui thong tin thiet bi
+* * * * * /home/ad01/bee/MQTT_send.sh
+#xoa du lieu
+0 0 1 * * sudo rm -rf /home/ad01/bee/record && mkdir /home/ad01/bee/record
+0 0 1 * * sudo rm -rf /home/ad01/bee/yolov5/result

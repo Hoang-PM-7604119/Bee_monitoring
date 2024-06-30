@@ -1,0 +1,11 @@
+
+pi01 : bee01: 10.8.0.3
+pi02 : bee02: 10.8.0.4
+pi03 : bee03: 10.8.0.5
+
+
+
+
+jetson nano (hop den):bee08: 10.8.0.7
+jetson nano( hộp mica) : bee09 : 10.8.0.6
+laptop: bee10: 10.8.0.2
