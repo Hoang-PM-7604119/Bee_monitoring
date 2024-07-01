@@ -14,5 +14,5 @@ username/psw: vuhai / Xaj57612
 Để không bị ngắt lệnh sau khi thoát ssh sử dụng nohup
 **********
 2 code cần thực thi:
-mqtt_insert_db.py : để lưu thông tin thiết bị vào database
-main.py : Để host web ( hiện đang dùng port 8008)
+- mqtt_insert_db.py : để lưu thông tin thiết bị vào database
+- main.py : Để host web ( hiện đang dùng port 8008)
