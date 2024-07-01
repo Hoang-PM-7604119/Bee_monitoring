@@ -48,7 +48,7 @@ void callbackDispatcher() {
     // Create a unique clientId for the WorkManager task to avoid conflicts
     final mqttClient = MqttServerClient('mica.edu.vn', 'workmanager_client_${DateTime.now().millisecondsSinceEpoch}');
     mqttClient.port = 50202;
-    mqttClient.logging(on: false);
+    mqttClient.logging(on: true);  // Enable detailed logging for debugging
 
     try {
       await mqttClient.connect();
@@ -79,18 +79,28 @@ void callbackDispatcher() {
       prefs.setString('deviceLastMessageTime', lastMessageTimeMapString);
       print('WorkManager - Updated SharedPreferences with latest message times');
 
-      // Disconnect from MQTT broker
-      mqttClient.disconnect();
+      // Debugging: Print out newDeviceLastMessageTime
+      print('WorkManager - newDeviceLastMessageTime: $newDeviceLastMessageTime');
 
       // Now perform the check for disconnected devices
       final storedLastMessageTimeMapString = prefs.getString('deviceLastMessageTime') ?? '{}';
       final Map<String, String> storedLastMessageTimeMap = Map<String, String>.from(json.decode(storedLastMessageTimeMapString));
       List<String> disconnectedDevices = [];
 
-      storedLastMessageTimeMap.forEach((device, lastMessageTimeString) {
-        final lastMessageTime = DateTime.parse(lastMessageTimeString);
-        if (currentTime.difference(lastMessageTime).inMinutes > 15) {
+      devices.forEach((device) {
+        if (!storedLastMessageTimeMap.containsKey(device) || storedLastMessageTimeMap[device]!.isEmpty) {
+          print('WorkManager - Device $device has no last message time.');
           disconnectedDevices.add(device);
+        } else {
+          final lastMessageTime = DateTime.parse(storedLastMessageTimeMap[device]!);
+          print('WorkManager - Checking device: $device, Last message time: $lastMessageTime');
+
+          // Add detailed debug information
+          print('WorkManager - currentTime difference with $device: ${currentTime.difference(lastMessageTime).inMinutes} minutes');
+
+          if (currentTime.difference(lastMessageTime).inMinutes > 15) {
+            disconnectedDevices.add(device);
+          }
         }
       });
 
@@ -120,7 +130,6 @@ void callbackDispatcher() {
     return Future.value(true);
   });
 }
-
 
 
 class MyApp extends StatelessWidget {
