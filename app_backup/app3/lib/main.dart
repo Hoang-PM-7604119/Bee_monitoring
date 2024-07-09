@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert'; // Import for JSON serialization
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async'; // Import for Timer
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,6 +46,20 @@ void callbackDispatcher() {
     final currentTime = DateTime.now();
     print("Current time: $currentTime");
 
+    // Check network connectivity
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      print('No network connection available.');
+      flutterLocalNotificationsPlugin.show(
+        0,
+        'MQTT Device Alert',
+        'No network connection available',
+        platformChannelSpecifics,
+        payload: 'Default_Sound',
+      );
+      return Future.value(true);
+    }
+
     // Create a unique clientId for the WorkManager task to avoid conflicts
     final mqttClient = MqttServerClient('mica.edu.vn', 'workmanager_client_${DateTime.now().millisecondsSinceEpoch}');
     mqttClient.port = 50202;
@@ -70,8 +85,8 @@ void callbackDispatcher() {
         newDeviceLastMessageTime[c[0].topic] = DateTime.now();
       });
 
-      // Wait for a short duration to receive messages
-      await Future.delayed(Duration(seconds: 120));
+      // Wait for a longer duration to receive messages
+      await Future.delayed(Duration(minutes: 5));
 
       // Update SharedPreferences with the latest message times
       final prefs = await SharedPreferences.getInstance();
@@ -125,6 +140,19 @@ void callbackDispatcher() {
       }
     } catch (e) {
       print('WorkManager - Exception: $e');
+      flutterLocalNotificationsPlugin.show(
+        0,
+        'MQTT Device Alert',
+        'Failed to connect to MQTT broker',
+        platformChannelSpecifics,
+        payload: 'Default_Sound',
+      );
+    } finally {
+      // Ensure to disconnect the client
+      if (mqttClient.connectionStatus!.state == MqttConnectionState.connected) {
+        mqttClient.disconnect();
+        print('MQTT client disconnected.');
+      }
     }
 
     return Future.value(true);
