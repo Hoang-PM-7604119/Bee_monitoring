@@ -52,7 +52,7 @@ void callbackDispatcher() {
       print('No network connection available.');
       flutterLocalNotificationsPlugin.show(
         0,
-        'MQTT Device Alert',
+        'Thiết bị thùng ong ngắt kết nối',
         'No network connection available',
         platformChannelSpecifics,
         payload: 'Default_Sound',
@@ -85,8 +85,8 @@ void callbackDispatcher() {
         newDeviceLastMessageTime[c[0].topic] = DateTime.now();
       });
 
-      // Wait for a longer duration to receive messages
-      await Future.delayed(Duration(minutes: 5));
+      // Wait for a duration to receive messages
+      await Future.delayed(Duration(minutes: 2));
 
       // Update SharedPreferences with the latest message times
       final prefs = await SharedPreferences.getInstance();
@@ -106,30 +106,20 @@ void callbackDispatcher() {
         if (!storedLastMessageTimeMap.containsKey(device) || storedLastMessageTimeMap[device]!.isEmpty) {
           print('WorkManager - Device $device has no last message time.');
           disconnectedDevices.add(device);
-        } else {
-          final lastMessageTime = DateTime.parse(storedLastMessageTimeMap[device]!);
-          print('WorkManager - Checking device: $device, Last message time: $lastMessageTime');
-
-          // Add detailed debug information
-          print('WorkManager - currentTime difference with $device: ${currentTime.difference(lastMessageTime).inMinutes} minutes');
-
-          if (currentTime.difference(lastMessageTime).inMinutes > 15) {
-            disconnectedDevices.add(device);
-          }
         }
       });
 
       if (disconnectedDevices.isNotEmpty) {
         String notificationMessage;
         if (disconnectedDevices.length == 1) {
-          notificationMessage = 'Device ${disconnectedDevices[0]} is not connected';
+          notificationMessage = 'Thiết bị ${disconnectedDevices[0]} mất kết nối';
         } else {
-          notificationMessage = 'Devices ${disconnectedDevices.join(', ')} are not connected';
+          notificationMessage = 'Các thiết bị ${disconnectedDevices.join(', ')} mất kết nối';
         }
 
         flutterLocalNotificationsPlugin.show(
           0,
-          'MQTT Device Alert',
+          'Cảnh báo thiết bị',
           notificationMessage,
           platformChannelSpecifics,
           payload: 'Default_Sound',
@@ -142,7 +132,7 @@ void callbackDispatcher() {
       print('WorkManager - Exception: $e');
       flutterLocalNotificationsPlugin.show(
         0,
-        'MQTT Device Alert',
+        'Thiết bị thùng ong ngắt kết nối',
         'Failed to connect to MQTT broker',
         platformChannelSpecifics,
         payload: 'Default_Sound',
@@ -159,11 +149,11 @@ void callbackDispatcher() {
   });
 }
 
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner :false,
       title: 'MQTT Table Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -217,7 +207,6 @@ class _MQTTTableScreenState extends State<MQTTTableScreen> {
     final connMessage = MqttConnectMessage()
         .withClientIdentifier(clientId)
         .startClean()
-        .keepAliveFor(60)
         .withWillQos(MqttQos.atLeastOnce);
 
     client.connectionMessage = connMessage;
@@ -337,7 +326,7 @@ class _MQTTTableScreenState extends State<MQTTTableScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('MQTT Table Demo'),
+        title: Text('Thông tin thiết bị'),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -347,7 +336,7 @@ class _MQTTTableScreenState extends State<MQTTTableScreen> {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 onPressed: _launchURL,
-                child: Text('Open Browser'),
+                child: Text('Mở trình duyệt'),
               ),
             ),
             SizedBox(height: 10), // Add spacing between the button and table
@@ -355,11 +344,11 @@ class _MQTTTableScreenState extends State<MQTTTableScreen> {
               scrollDirection: Axis.horizontal,
               child: DataTable(
                 columns: [
-                  DataColumn(label: Text('Device')),
-                  DataColumn(label: Text('Time')),
-                  DataColumn(label: Text('Camera Status')),
-                  DataColumn(label: Text('Disk Space')),
-                  DataColumn(label: Text('CPU Temperature')),
+                  DataColumn(label: Text('Thiết bị')),
+                  DataColumn(label: Text('Thời gian')),
+                  DataColumn(label: Text('Camera')),
+                  DataColumn(label: Text('Bộ nhớ')),
+                  DataColumn(label: Text('Nhiệt độ CPU')),
                 ],
                 rows: devices.map((device) {
                   final info = devicesInfo[device];
